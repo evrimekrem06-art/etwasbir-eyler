@@ -1,0 +1,2314 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>fürlingo — TestDaF Coach</title>
+
+  <style>
+    :root {
+      --bg: #f6f9ff;
+      --card: rgba(255,255,255,.9);
+      --solid: #ffffff;
+      --text: #182033;
+      --muted: #6c7486;
+      --primary: #5b7cfa;
+      --primary2: #9ab0ff;
+      --accent: #eef3ff;
+      --line: rgba(35,45,70,.1);
+      --danger: #cc5360;
+      --shadow: 0 18px 45px rgba(32, 47, 92, .10);
+    }
+
+    [data-theme="sand"] {
+      --bg: #fbf7ee;
+      --primary: #c28a43;
+      --primary2: #efd1a5;
+      --accent: #fff1dd;
+    }
+
+    [data-theme="mint"] {
+      --bg: #f2fbf7;
+      --primary: #2f9e7b;
+      --primary2: #a7ead7;
+      --accent: #e9fbf4;
+    }
+
+    [data-theme="lavender"] {
+      --bg: #f8f5ff;
+      --primary: #8a69dd;
+      --primary2: #d7cbff;
+      --accent: #f0eaff;
+    }
+
+    [data-theme="peach"] {
+      --bg: #fff6f3;
+      --primary: #e3826c;
+      --primary2: #ffd1c4;
+      --accent: #fff0ea;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, var(--accent), transparent 35%),
+        linear-gradient(180deg, var(--bg), #ffffff 75%);
+      color: var(--text);
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font-family: inherit;
+    }
+
+    .app {
+      width: min(460px, 100%);
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 18px 16px 34px;
+    }
+
+    .screen {
+      display: none;
+      animation: enter .25s ease both;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes enter {
+      from {
+        opacity: 0;
+        transform: translateY(10px) scale(.99);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes run {
+      0% {
+        transform: translateX(-10px);
+      }
+
+      50% {
+        transform: translateX(10px);
+      }
+
+      100% {
+        transform: translateX(-10px);
+      }
+    }
+
+    .glass {
+      background: var(--card);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 850;
+      letter-spacing: -.04em;
+      font-size: 1.35rem;
+    }
+
+    .brand-icon {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 16px;
+      background: var(--accent);
+      border: 1px solid var(--line);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .avatar-btn {
+      width: 44px;
+      height: 44px;
+      border: 0;
+      border-radius: 16px;
+      background: var(--solid);
+      font-size: 1.25rem;
+      box-shadow: 0 10px 26px rgba(0,0,0,.07);
+    }
+
+    .onboard {
+      padding: 22px;
+      margin-top: 16px;
+    }
+
+    .onboard h1,
+    .panel h2,
+    .panel h3,
+    .hero h2 {
+      letter-spacing: -.05em;
+    }
+
+    .onboard h1 {
+      font-size: 2.05rem;
+      line-height: .98;
+      margin: 12px 0;
+    }
+
+    p {
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .step {
+      display: none;
+    }
+
+    .step.active {
+      display: block;
+    }
+
+    label {
+      display: block;
+      font-size: .82rem;
+      font-weight: 750;
+      color: var(--muted);
+      margin: 14px 0 7px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 13px 14px;
+      background: rgba(255,255,255,.75);
+      color: var(--text);
+      outline: none;
+      font-size: .96rem;
+    }
+
+    textarea {
+      min-height: 130px;
+      resize: vertical;
+      line-height: 1.55;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .row > * {
+      flex: 1;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 18px;
+      padding: 13px 15px;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 12px 25px rgba(91, 124, 250, .22);
+      transition: transform .18s ease;
+    }
+
+    .btn:active {
+      transform: scale(.98);
+    }
+
+    .btn.secondary {
+      background: var(--accent);
+      color: var(--text);
+      border: 1px solid var(--line);
+      box-shadow: none;
+    }
+
+    .btn.danger {
+      background: #fff0f2;
+      color: var(--danger);
+      border: 1px solid rgba(204,83,96,.2);
+      box-shadow: none;
+    }
+
+    .chips {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin: 16px 0;
+    }
+
+    .chip {
+      border: 1px solid var(--line);
+      background: var(--solid);
+      border-radius: 18px;
+      padding: 12px;
+      text-align: left;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .chip.selected {
+      border-color: var(--primary);
+      background: var(--accent);
+    }
+
+    .chip strong {
+      display: block;
+    }
+
+    .chip small {
+      color: var(--muted);
+    }
+
+    .hero {
+      min-height: 155px;
+      padding: 18px;
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero h2 {
+      margin: 6px 0 8px;
+      font-size: 1.55rem;
+    }
+
+    .hero-meta {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 8px 10px;
+      background: var(--accent);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      font-size: .78rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .runner {
+      font-size: 3.7rem;
+      position: absolute;
+      right: 25px;
+      bottom: 16px;
+      animation: run 1.8s ease-in-out infinite;
+    }
+
+    .timer {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 12px;
+      border-radius: 20px;
+      background: var(--solid);
+      border: 1px solid var(--line);
+      margin-bottom: 14px;
+    }
+
+    .timer strong {
+      display: block;
+    }
+
+    .timer small {
+      color: var(--muted);
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .nav-card {
+      min-height: 130px;
+      border: 1px solid var(--line);
+      border-radius: 25px;
+      padding: 16px;
+      background: var(--card);
+      box-shadow: 0 12px 34px rgba(20,30,60,.07);
+      cursor: pointer;
+      text-align: left;
+      color: var(--text);
+      position: relative;
+      overflow: hidden;
+      transition: .22s ease;
+    }
+
+    .nav-card:active {
+      transform: scale(.985);
+    }
+
+    .nav-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .nav-card::after {
+      content: "";
+      position: absolute;
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: var(--accent);
+      right: -42px;
+      bottom: -42px;
+    }
+
+    .icon {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      background: var(--accent);
+      border-radius: 16px;
+      margin-bottom: 12px;
+      font-size: 1.25rem;
+    }
+
+    .nav-card h3 {
+      margin: 0 0 4px;
+      font-size: 1.02rem;
+    }
+
+    .nav-card p {
+      margin: 0;
+      font-size: .82rem;
+    }
+
+    .panel {
+      padding: 18px;
+      margin-bottom: 14px;
+    }
+
+    .backline {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 13px;
+    }
+
+    .list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .item {
+      padding: 13px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.75);
+      border: 1px solid var(--line);
+    }
+
+    .item strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .item small {
+      color: var(--muted);
+      display: block;
+      line-height: 1.45;
+    }
+
+    .option {
+      display: block;
+      width: 100%;
+      text-align: left;
+      margin: 9px 0;
+      padding: 13px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: var(--solid);
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .soon {
+      opacity: .62;
+      position: relative;
+    }
+
+    .soon::before {
+      content: "Yakında";
+      position: absolute;
+      right: 12px;
+      top: 12px;
+      background: var(--accent);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 8px;
+      font-size: .7rem;
+      font-weight: 850;
+    }
+
+    .badge-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .badge {
+      padding: 13px;
+      border-radius: 20px;
+      background: var(--solid);
+      border: 1px solid var(--line);
+      min-height: 94px;
+    }
+
+    .badge.locked {
+      opacity: .55;
+      filter: grayscale(.35);
+    }
+
+    .leader-row {
+      display: grid;
+      grid-template-columns: 32px 1fr auto;
+      align-items: center;
+      gap: 10px;
+      padding: 11px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .leader-row.me {
+      background: var(--accent);
+      border-radius: 16px;
+      border-bottom: 0;
+    }
+
+    .share-card {
+      width: 100%;
+      aspect-ratio: 9/16;
+      min-height: 460px;
+      border-radius: 34px;
+      background:
+        radial-gradient(circle at top right, var(--primary2), transparent 34%),
+        linear-gradient(160deg, var(--solid), var(--accent));
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      margin: 14px 0;
+    }
+
+    .share-card .big {
+      font-size: 3.4rem;
+    }
+
+    .share-card h2 {
+      font-size: 2rem;
+      line-height: 1.05;
+      margin: 0;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      place-items: center;
+      background: rgba(12, 16, 28, .38);
+      z-index: 10;
+      padding: 16px;
+    }
+
+    .modal.show {
+      display: grid;
+    }
+
+    .modal-box {
+      width: min(420px, 100%);
+      padding: 18px;
+      background: var(--solid);
+      border-radius: 28px;
+      box-shadow: 0 30px 80px rgba(0,0,0,.22);
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 20px;
+      transform: translateX(-50%) translateY(20px);
+      opacity: 0;
+      background: #182033;
+      color: white;
+      padding: 12px 14px;
+      border-radius: 999px;
+      font-weight: 800;
+      z-index: 20;
+      transition: .22s ease;
+      max-width: calc(100% - 32px);
+      text-align: center;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 370px) {
+      .cards,
+      .chips {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body data-theme="blue">
+  <div class="app">
+    <div id="onboarding" class="screen">
+      <div class="onboard glass">
+        <div class="brand">
+          <span class="brand-icon" id="obMascot">📘</span>
+          <span>fürlingo</span>
+        </div>
+
+        <div class="step active" data-step="0">
+          <h1>TestDaF için kişisel çalışma koçun.</h1>
+          <p>
+            fürlingo seni zorlamadan düzen kurmana, mini denemeler yapmana,
+            kelime ve günlük ifadeleri ayırarak öğrenmene yardım eder.
+          </p>
+          <button class="btn" onclick="nextStep()">Başla</button>
+        </div>
+
+        <div class="step" data-step="1">
+          <h1>Dil seçimi</h1>
+          <p>Arayüz dilini seç. İçerikler Almanca odaklı kalır.</p>
+
+          <div class="chips">
+            <button class="chip selected" onclick="setTempLang('tr', this)">
+              <strong>Türkçe</strong>
+              <small>Arayüz Türkçe</small>
+            </button>
+
+            <button class="chip" onclick="setTempLang('de', this)">
+              <strong>Deutsch</strong>
+              <small>Deutsche Oberfläche</small>
+            </button>
+
+            <button class="chip" onclick="setTempLang('en', this)">
+              <strong>English</strong>
+              <small>English interface</small>
+            </button>
+          </div>
+
+          <div class="row">
+            <button class="btn secondary" onclick="prevStep()">Geri</button>
+            <button class="btn" onclick="nextStep()">Devam</button>
+          </div>
+        </div>
+
+        <div class="step" data-step="2">
+          <h1>Profil</h1>
+          <p>İsim alanı boş gelir. Sen nasıl görünmek istiyorsan öyle yaz.</p>
+
+          <label>İsim</label>
+          <input id="nameInput" placeholder="İsmini yaz" />
+
+          <label>Hedef seviye</label>
+          <select id="targetInput">
+            <option>TDN 3</option>
+            <option selected>TDN 4</option>
+            <option>TDN 5</option>
+          </select>
+
+          <label>Sınav tarihi</label>
+          <input id="examDateInput" type="date" />
+
+          <div class="row" style="margin-top:16px;">
+            <button class="btn secondary" onclick="prevStep()">Geri</button>
+            <button class="btn" onclick="nextStep()">Devam</button>
+          </div>
+        </div>
+
+        <div class="step" data-step="3">
+          <h1>Tema</h1>
+          <p>Temalar açık renkli, modern ve çocuksu olmayan bir görsel sistem kullanır.</p>
+
+          <div class="chips" id="themeChoices"></div>
+
+          <div class="row">
+            <button class="btn secondary" onclick="prevStep()">Geri</button>
+            <button class="btn" onclick="nextStep()">Devam</button>
+          </div>
+        </div>
+
+        <div class="step" data-step="4">
+          <h1>Avatar</h1>
+          <p>
+            Seçtiğin temaya göre bir avatar öneriyorum.
+            İstersen değiştir veya kendi avatarını yükle.
+          </p>
+
+          <div class="chips" id="avatarChoices"></div>
+
+          <label>Kendi avatarını yükle</label>
+          <input type="file" accept="image/*" id="avatarUpload" />
+
+          <div class="row" style="margin-top:16px;">
+            <button class="btn secondary" onclick="prevStep()">Geri</button>
+            <button class="btn" onclick="finishOnboarding()">fürlingo’ya gir</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="home" class="screen">
+      <div class="topbar">
+        <div class="brand">
+          <span class="brand-icon" id="brandMascot">📘</span>
+          <span>fürlingo</span>
+        </div>
+
+        <button class="avatar-btn" onclick="openSection('profile')" id="topAvatar">📘</button>
+      </div>
+
+      <div class="hero glass" id="hero"></div>
+
+      <div class="timer">
+        <div>
+          <strong id="studyTimerText">00:00:00</strong>
+          <small>Çalışma kronometresi</small>
+        </div>
+
+        <button class="btn secondary" id="timerBtn" onclick="toggleStudyTimer()">Başlat</button>
+      </div>
+
+      <div class="cards">
+        <button class="nav-card" onclick="openSection('study')">
+          <div class="icon">📚</div>
+          <h3>Study</h3>
+          <p>Kelime, deyimler, okuma, yazma ve hızlı pratik.</p>
+        </button>
+
+        <button class="nav-card" onclick="openSection('mock')">
+          <div class="icon">🎯</div>
+          <h3>Mock Test</h3>
+          <p>Mini deneme aktif. Orta ve tam mod yakında.</p>
+        </button>
+
+        <button class="nav-card" onclick="openSection('plan')">
+          <div class="icon">🗓️</div>
+          <h3>Plan</h3>
+          <p>Sınav tarihine ve sonuçlarına göre öneriler.</p>
+        </button>
+
+        <button class="nav-card" onclick="openSection('idioms')">
+          <div class="icon">💬</div>
+          <h3>Deyimler</h3>
+          <p>Günlük ifadeler, TestDaF uygunluk ve emoji puzzle.</p>
+        </button>
+
+        <button class="nav-card" onclick="openSection('social')">
+          <div class="icon">🏆</div>
+          <h3>Social</h3>
+          <p>Rozetler, demo liderlik ve paylaşım kartı.</p>
+        </button>
+
+        <button class="nav-card" onclick="openSection('profile')">
+          <div class="icon">⚙️</div>
+          <h3>Profile</h3>
+          <p>Tema, avatar, hatırlatma ve veri ayarları.</p>
+        </button>
+      </div>
+    </div>
+
+    <div id="section" class="screen">
+      <div class="backline">
+        <button class="btn secondary" onclick="showHome()">← Ana ekran</button>
+        <button class="avatar-btn" onclick="openSection('profile')" id="sectionAvatar">📘</button>
+      </div>
+
+      <div id="sectionContent"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="modal">
+    <div class="modal-box">
+      <h3 id="modalTitle">Başlık</h3>
+      <p id="modalText">Metin</p>
+
+      <div class="row">
+        <button class="btn secondary" onclick="closeModal()">Vazgeç</button>
+        <button class="btn danger" id="modalConfirm">Onayla</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Kaydedildi</div>
+
+  <script>
+    const LS = "furlingo_v1_state";
+
+    const defaultState = {
+      onboarded: false,
+      lang: "tr",
+      name: "",
+      target: "TDN 4",
+      examDate: "",
+      theme: "blue",
+      avatar: "📘",
+      avatarImage: "",
+      xp: 0,
+      streak: 0,
+      badges: [],
+      writings: [],
+      customIdioms: [],
+      reminders: {
+        daily: true,
+        exam: true,
+        streak: true,
+        mock: false,
+        vocab: true
+      },
+      privacy: {
+        friends: true,
+        global: false,
+        target: true,
+        privateProfile: false
+      },
+      lastMiniScore: null
+    };
+
+    let state = loadState();
+    let temp = { ...state };
+    let step = 0;
+    let heroIndex = 0;
+
+    let studySeconds = 0;
+    let studyRunning = false;
+    let studyInterval = null;
+
+    let examSecondsLeft = 0;
+    let examRunning = false;
+    let examInterval = null;
+
+    let miniAnswers = {};
+    let miniStep = 0;
+    let puzzleCombo = 0;
+
+    const themeNames = {
+      tr: {
+        blue: "Mavi Odak",
+        sand: "Kum Sakinliği",
+        mint: "Nane Ferahlığı",
+        lavender: "Lila Odak",
+        peach: "Şeftali Enerjisi"
+      },
+      de: {
+        blue: "Blau Fokus",
+        sand: "Sand Ruhe",
+        mint: "Minze Frisch",
+        lavender: "Lavendel Fokus",
+        peach: "Pfirsich Licht"
+      },
+      en: {
+        blue: "Soft Blue",
+        sand: "Warm Sand",
+        mint: "Mint Fresh",
+        lavender: "Lavender Focus",
+        peach: "Peach Light"
+      }
+    };
+
+    const themeMascots = {
+      blue: ["📘", "🧑‍🎓", "🗂️"],
+      sand: ["☕", "📖", "🕯️"],
+      mint: ["🌱", "🏃‍♂️", "🍃"],
+      lavender: ["🧠", "🔮", "🪻"],
+      peach: ["🚀", "✨", "🧡"]
+    };
+
+    const vocabulary = [
+      {
+        word: "die Entwicklung",
+        meaning: "gelişme, değişim",
+        example: "Die Entwicklung der Studentenzahlen zeigt einen klaren Anstieg.",
+        tag: "Grafik"
+      },
+      {
+        word: "der Anteil",
+        meaning: "oran, pay",
+        example: "Der Anteil der Studierenden ist gestiegen.",
+        tag: "Statistik"
+      },
+      {
+        word: "begründen",
+        meaning: "gerekçelendirmek",
+        example: "Man sollte seine Meinung gut begründen.",
+        tag: "Argumentation"
+      }
+    ];
+
+    const idioms = [
+      {
+        phrase: "Das kommt darauf an.",
+        meaning: "Duruma bağlı.",
+        en: "It depends.",
+        example: "Ob Online-Unterricht besser ist, kommt darauf an.",
+        status: "✅ TestDaF uygun",
+        usage: "Günlük + akademik",
+        icon: "🤔⚖️"
+      },
+      {
+        phrase: "Meiner Meinung nach ...",
+        meaning: "Bana göre ...",
+        en: "In my opinion ...",
+        example: "Meiner Meinung nach ist regelmäßiges Üben sehr wichtig.",
+        status: "✅ TestDaF uygun",
+        usage: "Akademik + konuşma",
+        icon: "💭✍️"
+      },
+      {
+        phrase: "Ich habe keinen Bock.",
+        meaning: "Canım istemiyor.",
+        en: "I don't feel like it.",
+        example: "Ich habe heute keinen Bock zu lernen.",
+        status: "❌ TestDaF için uygun değil",
+        usage: "Arkadaş arası / günlük",
+        icon: "😴🙅"
+      },
+      {
+        phrase: "Kein Stress.",
+        meaning: "Sorun yok, rahat ol.",
+        en: "No worries.",
+        example: "Kein Stress, wir schaffen das.",
+        status: "⚠️ Günlük kullanım",
+        usage: "Arkadaş arası",
+        icon: "😌🕊️"
+      }
+    ];
+
+    const safeMap = {
+      "meiner meinung nach": {
+        label: "✅ TestDaF için uygun",
+        why: "Fikir belirtmek için güvenli, net ve akademik bağlama uygundur.",
+        alt: "Ich bin der Ansicht, dass ... / Aus meiner Sicht ...",
+        where: "TestDaF yazma, TestDaF konuşma, akademik tartışma, resmî bağlam."
+      },
+      "das kommt darauf an": {
+        label: "✅ TestDaF için uygun",
+        why: "Dikkatli kullanıldığında fikir tartışmalarında doğal ve güvenlidir.",
+        alt: "Dies hängt von mehreren Faktoren ab.",
+        where: "Konuşma, tartışma, kısa görüş belirtme."
+      },
+      "kein stress": {
+        label: "⚠️ Günlük kullanım",
+        why: "Doğal bir günlük ifade ama akademik yazıda fazla samimi kalır.",
+        alt: "Das ist kein Problem. / Es besteht kein Grund zur Sorge.",
+        where: "Arkadaş arası, günlük konuşma. TestDaF yazmada kullanma."
+      },
+      "ich habe keinen bock": {
+        label: "❌ TestDaF için uygun değil",
+        why: "Samimi ve argo tınılıdır. Resmî veya akademik bağlamda uygunsuz durabilir.",
+        alt: "Ich bin momentan nicht besonders motiviert.",
+        where: "Arkadaş arası. TestDaF yazma ve resmî e-postada kullanma."
+      },
+      "digga": {
+        label: "❌ TestDaF için uygun değil",
+        why: "Gençlik dili/sosyal medya ifadesidir.",
+        alt: "Arkadaşım / mein Freund, bağlama göre.",
+        where: "Arkadaş grubu ve sosyal medya. Sınavda kullanma."
+      }
+    };
+
+    const readingText =
+      "Immer mehr Studierende nutzen digitale Lernplattformen, um sich auf Prüfungen vorzubereiten. Besonders beliebt sind kurze Übungen, weil sie sich gut in den Alltag integrieren lassen. Gleichzeitig betonen viele Lehrende, dass regelmäßige Wiederholung wichtiger ist als lange, aber seltene Lernphasen.";
+
+    function loadState() {
+      try {
+        return {
+          ...defaultState,
+          ...(JSON.parse(localStorage.getItem(LS)) || {})
+        };
+      } catch {
+        return { ...defaultState };
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(LS, JSON.stringify(state));
+      applyState();
+    }
+
+    function applyState() {
+      document.body.dataset.theme = state.theme || "blue";
+
+      const brandMascot = document.getElementById("brandMascot");
+      const topAvatar = document.getElementById("topAvatar");
+      const sectionAvatar = document.getElementById("sectionAvatar");
+      const obMascot = document.getElementById("obMascot");
+
+      if (brandMascot) brandMascot.textContent = state.avatar || "📘";
+      if (topAvatar) topAvatar.textContent = state.avatar || "📘";
+      if (sectionAvatar) sectionAvatar.textContent = state.avatar || "📘";
+      if (obMascot) obMascot.textContent = temp.avatar || state.avatar || "📘";
+    }
+
+    function showScreen(id) {
+      document.querySelectorAll(".screen").forEach(screen => {
+        screen.classList.remove("active");
+      });
+
+      document.getElementById(id).classList.add("active");
+
+      applyState();
+
+      if (id === "home") {
+        renderHero();
+      }
+    }
+
+    function nextStep() {
+      step = Math.min(step + 1, 4);
+      renderStep();
+    }
+
+    function prevStep() {
+      step = Math.max(step - 1, 0);
+      renderStep();
+    }
+
+    function renderStep() {
+      document.querySelectorAll(".step").forEach(s => {
+        s.classList.remove("active");
+      });
+
+      document.querySelector(`[data-step="${step}"]`).classList.add("active");
+
+      if (step === 3) renderThemeChoices();
+      if (step === 4) renderAvatarChoices();
+
+      applyState();
+    }
+
+    function setTempLang(lang, element) {
+      temp.lang = lang;
+
+      element.parentElement.querySelectorAll(".chip").forEach(c => {
+        c.classList.remove("selected");
+      });
+
+      element.classList.add("selected");
+
+      renderThemeChoices();
+    }
+
+    function renderThemeChoices() {
+      const box = document.getElementById("themeChoices");
+      if (!box) return;
+
+      const lang = temp.lang || "tr";
+
+      box.innerHTML = Object.keys(themeNames.tr).map(code => `
+        <button class="chip ${temp.theme === code ? "selected" : ""}" onclick="selectTempTheme('${code}', this)">
+          <strong>${themeNames[lang][code]}</strong>
+          <small>${themeMascots[code][0]} ${code}</small>
+        </button>
+      `).join("");
+    }
+
+    function selectTempTheme(code, element) {
+      temp.theme = code;
+      temp.avatar = themeMascots[code][0];
+
+      document.body.dataset.theme = code;
+
+      element.parentElement.querySelectorAll(".chip").forEach(c => {
+        c.classList.remove("selected");
+      });
+
+      element.classList.add("selected");
+
+      applyState();
+    }
+
+    function renderAvatarChoices() {
+      const box = document.getElementById("avatarChoices");
+      const avatars = themeMascots[temp.theme] || themeMascots.blue;
+
+      box.innerHTML = avatars.map(avatar => `
+        <button class="chip ${temp.avatar === avatar ? "selected" : ""}" onclick="selectTempAvatar('${avatar}', this)">
+          <strong style="font-size:1.7rem">${avatar}</strong>
+          <small>Avatar</small>
+        </button>
+      `).join("");
+
+      const upload = document.getElementById("avatarUpload");
+
+      upload.onchange = event => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+
+        reader.onload = () => {
+          temp.avatarImage = reader.result;
+          temp.avatar = "🖼️";
+          toast("Avatar yüklendi");
+        };
+
+        reader.readAsDataURL(file);
+      };
+    }
+
+    function selectTempAvatar(avatar, element) {
+      temp.avatar = avatar;
+
+      element.parentElement.querySelectorAll(".chip").forEach(c => {
+        c.classList.remove("selected");
+      });
+
+      element.classList.add("selected");
+
+      applyState();
+    }
+
+    function finishOnboarding() {
+      state = {
+        ...state,
+        onboarded: true,
+        lang: temp.lang || "tr",
+        theme: temp.theme || "blue",
+        avatar: temp.avatar || "📘",
+        avatarImage: temp.avatarImage || "",
+        name: document.getElementById("nameInput").value.trim(),
+        target: document.getElementById("targetInput").value,
+        examDate: document.getElementById("examDateInput").value
+      };
+
+      saveState();
+      showScreen("home");
+      toast("Hoş geldin!");
+    }
+
+    function getDaysLeft() {
+      if (!state.examDate) return null;
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const exam = new Date(state.examDate);
+
+      if (isNaN(exam)) return null;
+
+      return Math.ceil((exam - today) / 86400000);
+    }
+
+    function renderHero() {
+      const hero = document.getElementById("hero");
+      const name = state.name || "fürlingo learner";
+      const days = getDaysLeft();
+
+      const slides = [
+        `
+          <h2>Merhaba ${escapeHtml(name)} 👋</h2>
+          <p>Bugün TDN hedefine bir adım daha yaklaş.</p>
+          <div class="hero-meta">
+            <span class="pill">${state.target}</span>
+            <span class="pill">${state.avatar} ${themeNames[state.lang][state.theme]}</span>
+          </div>
+        `,
+        `
+          <h2>${days === null ? "Sınav tarihi ekle" : days + " gün kaldı"}</h2>
+          <p>Günlük hedef: Mini deneme + 3 akademik kelime + 1 deyim.</p>
+          <div class="hero-meta">
+            <span class="pill">Plan değiştirilebilir</span>
+            <span class="pill">Kullanıcı kontrolü</span>
+          </div>
+        `,
+        `
+          <h2>${state.xp} XP</h2>
+          <p>🔥 ${state.streak} günlük seri · 🏆 ${state.badges.length} rozet</p>
+          <div class="hero-meta">
+            <span class="pill">Sosyal yarışma demo</span>
+            <span class="pill">Paylaşılabilir başarılar</span>
+          </div>
+        `,
+        `
+          <h2>Almanca bayrağıyla hedefe koş.</h2>
+          <p>Ders modunda animasyon sadeleşir; odak sende kalır.</p>
+          <div class="runner">${state.avatar}🇩🇪</div>
+        `
+      ];
+
+      hero.innerHTML = slides[heroIndex % slides.length];
+    }
+
+    setInterval(() => {
+      if (document.getElementById("home").classList.contains("active")) {
+        heroIndex++;
+        renderHero();
+      }
+    }, 15000);
+
+    function openSection(name) {
+      showScreen("section");
+
+      const actions = {
+        study: renderStudy,
+        mock: renderMock,
+        plan: renderPlan,
+        idioms: renderIdioms,
+        social: renderSocial,
+        profile: renderProfile
+      };
+
+      actions[name]();
+    }
+
+    function showHome() {
+      showScreen("home");
+    }
+
+    function renderStudy() {
+      document.getElementById("sectionContent").innerHTML = `
+        <div class="panel glass">
+          <h2>Study</h2>
+          <p>Aktif modüller: kelime, deyimler, okuma, yazma ve hızlı pratik. Dinleme ve konuşma yakında.</p>
+
+          <div class="list">
+            <button class="option" onclick="renderVocabulary()">📚 Kelime çalış</button>
+            <button class="option" onclick="openSection('idioms')">💬 Deyimler & Günlük İfadeler</button>
+            <button class="option" onclick="renderReading()">📖 Okuma</button>
+            <button class="option" onclick="renderWriting()">✍️ Yazma</button>
+            <button class="option" onclick="renderQuickPractice()">⚡ Quick Practice</button>
+            <button class="option soon" onclick="soon('Dinleme')">🎧 Dinleme</button>
+            <button class="option soon" onclick="soon('Konuşma')">🎤 Konuşma</button>
+          </div>
+        </div>
+      `;
+
+      timerNudge();
+    }
+
+    function renderVocabulary() {
+      document.getElementById("sectionContent").innerHTML = `
+        <div class="panel glass">
+          <h2>Akademik Kelime</h2>
+          <p>Az ama temiz içerik. Daha sonra liste büyütülebilir.</p>
+
+          <div class="list">
+            ${vocabulary.map(v => `
+              <div class="item">
+                <strong>${v.word}</strong>
+                <small>${v.meaning}</small>
+                <small>${v.example}</small>
+                <span class="pill">${v.tag}</span>
+              </div>
+            `).join("")}
+          </div>
+
+          <br>
+          <button class="btn" onclick="gainXp(30, '📚 Kelime tekrarı')">Tekrarı tamamla +30 XP</button>
+        </div>
+      `;
+    }
+
+    function renderReading() {
+      document.getElementById("sectionContent").innerHTML = `
+        <div class="panel glass">
+          <h2>Okuma</h2>
+          <p>${readingText}</p>
+
+          <strong>Soru: Metne göre kısa egzersizler neden popüler?</strong>
+
+          <button class="option" onclick="toast('Doğru! +10 XP'); gainXp(10)">
+            Günlük hayata kolay uydukları için.
+          </button>
+
+          <button class="option" onclick="toast('Henüz değil. Metinde düzenli kısa tekrar vurgulanıyor.')">
+            Çünkü öğretmenler uzun dersleri yasakladığı için.
+          </button>
+        </div>
+      `;
+    }
+
+    function renderWriting(prefill = "", title = "Online-Unterricht") {
+      document.getElementById("sectionContent").innerHTML = `
+        <div class="panel glass">
+          <h2>Yazma</h2>
+          <p>
+            Kısa görev:
+            “Online-Unterricht hat viele Vorteile.”
+            Bu görüşü 5-6 cümleyle değerlendir.
+          </p>
+
+          <label>Başlık</label>
+          <input id="writingTitle" value="${escapeHtml(title)}">
+
+          <label>Metnin</label>
+          <textarea id="writingText" placeholder="Meiner Meinung nach ...">${escapeHtml(prefill)}</textarea>
+
+          <br><br>
+          <button class="btn" onclick="analyzeWriting()">Analiz et ve kaydet</button>
+          <button class="btn secondary" onclick="renderWritingHistory()">Geçmiş yazılarım</button>
+        </div>
+      `;
+    }
+
+    function analyzeWriting() {
+      const text = document.getElementById("writingText").value.trim();
+      const title = document.getElementById("writingTitle").value.trim() || "Yazma görevi";
+
+      const words = text.split(/\s+/).filter(Boolean).length;
+      const lower = text.toLowerCase();
+
+      let score = 20;
+
+      if (words >= 30) score += 22;
+      if (/meiner meinung|ich bin der ansicht|aus meiner sicht|ich denke/.test(lower)) score += 18;
+      if (/weil|deshalb|außerdem|jedoch|zudem|daher/.test(lower)) score += 18;
+      if (/zusammenfassend|abschließend|insgesamt/.test(lower)) score += 14;
+      if (/entwicklung|anteil|vorteil|nachteil|grund|beispiel/.test(lower)) score += 8;
+
+      score = Math.min(score, 100);
+
+      const tdn = scoreToTdn(score);
+
+      const feedback = score >= 76
+        ? "Güzel yapı kurmuşsun. TDN 4 hedefi için doğru yoldasın."
+        : "İyi bir başlangıç. Giriş, bağlaç ve sonuç cümlesini güçlendirerek hızlı gelişebilirsin.";
+
+      const version = state.writings.filter(w => w.title === title).length + 1;
+
+      const entry = {
+        id: Date.now(),
+        title,
+        text,
+        words,
+        score,
+        tdn,
+        feedback,
+        version,
+        date: new Date().toLocaleDateString("tr-TR")
+      };
+
+      state.writings.unshift(entry);
+      saveState();
+
+      gainXp(80, "✍️ Yazma görevi");
+
+      document.getElementById("sectionContent").innerHTML = `
+        <div class="panel glass">
+          <h2>✍️ Yazma Analizi</h2>
+
+          <div class="list">
+            <div class="item">
+              <strong>Kelime sayısı</strong>
+              <small>${words}</small>
+            </div>
+
+            <div class="item">
+              <strong>Hedefe yakınlık</strong>
+              <small>%${score} → ${tdn}</small>
+            </div>
+
+            <div class="item">
+              <strong>Koç notu</strong>
+              <small>${feedback}</small>
+            </div>
+          </div>
+
+          <br>
+          <button class="btn" onclick="renderShareCard('Yazma görevi tamamlandı', '${tdn}', '%${score}')">
+            Başarı kartı oluştur
+          </button>
+
+          <button class="btn secondary" onclick="exportWriting(${entry.id})">
+            Metni dışa aktar
+          </button>
+
+          <button class="btn secondary" onclick="renderWritingHistory()">
+            Geçmiş yazılar
+          </button>
+        </div>
+      `;
+    }
+
+    function renderWritingHistory() {
+      const items = state.writings.map(w => `
+        <div class="item">
+          <strong>${escapeHtml(w.title)} — Versiyon ${w.version}</strong>
+          <small>${w.date} · ${w.tdn} · %${w.score}</small>
+
+          <button class="btn secondary" onclick="renderWriting(${JSON.stringify(w.text)}, ${JSON.stringify(w.title)})">
+            Yeni versiyon oluştur
+          </button>
+
+          <button class="btn secondary" onclick="exportWriting(${w.id})">
+            Dışa aktar
+          </button>
+        </div>
+      `).join("") || `
+        <div class="item">
+          <strong>Henüz yazı yok</strong>
+          <small>İlk yazma görevini tamamladığında burada görünür.</small>
+        </div>
+      `;
+
+      document.getElementById("sectionContent").innerHTML = `
+        <div class="panel glass">
+          <h2>Geçmiş Yazılarım</h2>
+          <p>
+            Eski metni düzenlediğinde orijinal metin korunur;
+            yeni versiyon olarak kaydedilir.
+          </p>
+
+          <div class="list">${items}</div>
+        </div>
+      `;
+    }
+
+    function exportWriting(id) {
+      const w = state.writings.find(x => x.id === id);
+      if (!w) return;
+
+      if (!confirm("Bu dışa aktarma dosyasında metnin tamamı yer alır. Onaylıyor musun?")) return;
+
+      const content =
+`fürlingo Writing Export
+
+Başlık: ${w.title}
+Tarih: ${w.date}
+Versiyon: ${w.version}
+Tahmini seviye: ${w.tdn}
+Puan: %${w.score}
+
+Metin:
+${w.text}
+
+Koç notu:
+${w.feedback}`;
+
+      const blob = new Blob([content], {
+        type: "text/plain;charset=utf-8"
+      });
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+
+      a.href = url;
+      a.download = "furlingo-yazma.txt";
+      a.click();
+
+      URL.revokeObjectURL(url);
+    }
+
+    function renderQuickPractice() {
+      document.getElementById("sectionContent").innerHTML = `
+        <div class="panel glass">
+          <h2>Quick Practice</h2>
+          <p>5 dakikalık hafif tekrar. Seri korumak için ideal.</p>
+
+          <div class="list">
+            <div class="item">
+              <strong>1 kelime</strong>
+              <small>der Anteil = oran, pay</small>
+            </div>
+
+            <div class="item">
+              <strong>1 ifade</strong>
+              <small>Das kommt darauf an. = Duruma bağlı.</small>
+            </div>
+
+            <div class="item">
+              <strong>1 cümle</strong>
+              <small>Meiner Meinung nach ist regelmäßiges Üben wichtig.</small>
+            </div>
+          </div>
+
+          <br>
+          <button class="btn" onclick="gainXp(25, '⚡ Quick Practice')">
+            Tamamla +25 XP
+          </button>
+        </div>
+      `;
+    }
+
+    function renderMock() {
+      document.getElementById("sectionContent").innerHTML = `
+        <div class="panel glass">
+          <h2>Deneme Modu</h2>
+          <p>Mini deneme aktif. Orta ve tam simülasyon sonraki sürümde eklenecek.</p>
+
+          <div class="list">
+            <button class="option" onclick="startMini()">
+              🎯 Mini Deneme
+              <small>Okuma + kelime + deyim + kısa yazma</small>
+            </button>
+
+            <button class="option soon" onclick="soon('Orta Deneme')">
+              🧭 Orta Deneme
+            </button>
+
+            <button class="option soon" onclick="soon('Tam Simülasyon')">
+              🏁 Tam Simülasyon
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function startMini() {
+      miniAnswers = {};
+      miniStep = 0;
+
+      document.getElementById("sectionContent").innerHTML = `
+        <div class="panel glass">
+          <h2>Mini Deneme</h2>
+          <p>
+            Önerilen süre: 10-15 dakika.
+            İstersen zamanlayıcı açabilirsin; açarsan çalışma kronometresi de başlar.
+          </p>
+
+          <div class="row">
+            <button class="btn" onclick="startExamTimer(15); renderMiniQuestion()">
+              Zamanlayıcıyla başla
+            </button>
+
+            <button class="btn secondary" onclick="renderMiniQuestion()">
+              Zamanlayıcısız başla
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderMiniQuestion() {
+      const questions = [
+        {
+          type: "Okuma",
+          html: `
+            <p>${readingText}</p>
+            <strong>Soru: Kısa egzersizlerin avantajı nedir?</strong>
+          `,
+          options: [
+            "Günlük hayata kolay entegre edilir.",
+            "Sadece öğretmenler için uygundur.",
+            "Sınava hazırlıkta gereksizdir."
+          ],
+          correct: 0
+        },
+        {
+          type: "Kelime",
+          html: `<strong>“der Anteil” ne anlama gelir?</strong>`,
+          options: [
+            "oran / pay",
+            "araştırma",
+            "sonuç cümlesi"
+          ],
+          correct: 0
+        },
+        {
+          type: "Deyim",
+          html: `<strong>“Das kommt darauf an.” ne demektir?</strong>`,
+          options: [
+            "Duruma bağlı.",
+            "Canım istemiyor.",
+            "Saygılarımla."
+          ],
+          correct: 0
+        },
+        {
+          type: "Yazma",
+          writing: true,
+          html: `
+            <strong>Kısa yazma:</strong>
+            <p>“Regelmäßiges Lernen ist wichtiger als langes Lernen.” Bu fikri 4-5 cümleyle açıkla.</p>
+            <textarea id="miniWriting" placeholder="Meiner Meinung nach ..."></textarea>
+          `
+        }
+      ];
+
+      const q = questions[miniStep];
+
+      if (!q) {
+        finishMini();
+        return;
+      }
+
+      const timerHtml = examRunning
+        ? `<span class="pill">Kalan süre: <span id="examTimerText">${formatTime(examSecondsLeft)}</span></span>`
+        : "";
+
+      document.getElementById("sectionContent").innerHTML = `
+        <div class="panel glass">
+          <div class="hero-meta">
+            ${timerHtml}
+            <span class="pill">${miniStep + 1}/4 · ${q.type}</span>
+          </div>
+
+          <h2>${q.type}</h2>
+
+          ${q.html}
+
+          ${
+            q.writing
+              ? `<button class="btn" onclick="saveMiniWriting()">Devam</button>`
+              : q.options.map((o, i) => `
+                  <button class="option" onclick="answerMini(${i}, ${q.correct})">${o}</button>
+                `).join("")
+          }
+        </div>
+      `;
+    }
+
+    function answerMini(choice, correct) {
+      miniAnswers["q" + miniStep] = choice === correct;
+      miniStep++;
+      renderMiniQuestion();
+    }
+
+    function saveMiniWriting() {
+      const text = document.getElementById("miniWriting").value.trim();
+      const words = text.split(/\s+/).filter(Boolean).length;
+
+      miniAnswers.writingScore =
+        Math.min(
+          100,
+          words * 3 +
+          (/meiner meinung|ich denke|ich bin/.test(text.toLowerCase()) ? 20 : 0)
+        );
+
+      miniStep++;
+      renderMiniQuestion();
+    }
+
+    function finishMini() {
+      stopExamTimer();
+
+      const correct = ["q0", "q1", "q2"].filter(k => miniAnswers[k]).length;
+      const writingScore = miniAnswers.writingScore || 0;
+
+      const score = Math.round(((correct / 3) * 70) + (Math.min(100, writingScore) * .30));
+      const tdn = scoreToTdn(score);
+
+      state.lastMiniScore = score;
+
+      let newBadge = null;
+
+      if (!state.badges.includes("İlk Mini Deneme")) {
+        state.badges.push("İlk Mini Deneme");
+        newBadge = "İlk Mini Deneme";
+      }
+
+      saveState();
+      gainXp(50, "🎯 Mini Deneme");
+
+      document.getElementById("sectionContent").innerHTML = `
+        <div class="panel glass">
+          <h2>Mini Deneme Sonucu</h2>
+
+          <div class="list">
+            <div class="item">
+              <strong>Genel sonuç</strong>
+              <small>%${score} → ${tdn}</small>
+            </div>
+
+            <div class="item">
+              <strong>Doğru cevap</strong>
+              <small>${correct}/3</small>
+            </div>
+
+            <div class="item">
+              <strong>Koç notu</strong>
+              <small>
+                ${score >= 80
+                  ? "TDN 4 temposuna çok yakınsın."
+                  : "İyi başlangıç. Yazma yapısı ve akademik ifadelerle puanını yükseltebilirsin."
+                }
+              </small>
+            </div>
+
+            ${
+              newBadge
+                ? `<div class="item"><strong>🏆 Yeni rozet</strong><small>${newBadge}</small></div>`
+                : ""
+            }
+          </div>
+
+          <br>
+
+          ${
+            newBadge
+              ? `<button class="btn" onclick="renderShareCard('Yeni rozet kazandım', '${newBadge}', 'Mini Deneme')">Hikâye kartı oluştur</button>`
+              : `<button class="btn" onclick="renderShareCard('Mini deneme tamamlandı', '${tdn}', '%${score}')">Paylaşım kartı oluştur</button>`
+          }
+
+          <button class="btn secondary" onclick="renderMock()">Deneme moduna dön</button>
+        </div>
+      `;
+    }
+
+    function renderPlan() {
+      const days = getDaysLeft();
+
+      const mode = days === null
+        ? "Sınav tarihini ekleyince plan daha netleşir."
+        : days > 90
+          ? "Alışkanlık kurma dönemi: kısa ama düzenli tekrarlar."
+          : days > 30
+            ? "Deneme ve zayıf beceri dönemi: haftalık mini/orta denemeler."
+            : "Sınav temposu dönemi: mini deneme, yazma ve hızlı tekrar ağırlıklı.";
+
+      document.getElementById("sectionContent").innerHTML = `
+        <div class="panel glass">
+          <h2>Çalışma Planı</h2>
+          <p>fürlingo plan önerir ama son karar kullanıcıdadır.</p>
+
+          <div class="item">
+            <strong>Durum</strong>
+            <small>${mode}</small>
+          </div>
+
+          <br>
+
+          <div class="list">
+            <div class="item">
+              <strong>Pazartesi</strong>
+              <small>Mini deneme + 3 kelime</small>
+            </div>
+
+            <div class="item">
+              <strong>Çarşamba</strong>
+              <small>Yazma + deyim puzzle</small>
+            </div>
+
+            <div class="item">
+              <strong>Cuma</strong>
+              <small>Okuma + Quick Practice</small>
+            </div>
+
+            <div class="item">
+              <strong>Pazar</strong>
+              <small>Hafif tekrar / dinlenme hakkı</small>
+            </div>
+          </div>
+
+          <br>
+
+          <button class="btn secondary" onclick="toast('Plan düzenleme sonraki prototipte detaylandırılacak')">
+            Planı değiştir
+          </button>
+        </div>
+      `;
+    }
+
+    function renderIdioms() {
+      const custom = state.customIdioms.map(x => `
+        <div class="item">
+          <strong>${escapeHtml(x.phrase)}</strong>
+          <small>${escapeHtml(x.note)}</small>
+
+          <button class="btn secondary" onclick="checkIdiom(${JSON.stringify(x.phrase)})">
+            TestDaF uygunluğunu kontrol et
+          </button>
+        </div>
+      `).join("");
+
+      document.getElementById("sectionContent").innerHTML = `
+        <div class="panel glass">
+          <h2>Deyimler & Günlük İfadeler</h2>
+          <p>
+            Günlük dil, akademik güvenlik ve sınavda kullanılmaması gereken ifadeler ayrı düşünülür.
+          </p>
+
+          <div class="list">
+            ${idioms.map(x => `
+              <div class="item">
+                <strong>${x.icon} ${x.phrase}</strong>
+                <small>TR: ${x.meaning} · EN: ${x.en}</small>
+                <small>${x.example}</small>
+                <span class="pill">${x.status}</span>
+                <span class="pill">${x.usage}</span>
+              </div>
+            `).join("")}
+          </div>
+
+          <br>
+
+          <button class="btn" onclick="renderPuzzle()">Emoji Puzzle oyna</button>
+          <button class="btn secondary" onclick="renderAddIdiom()">Kendi deyimimi ekle</button>
+        </div>
+
+        <div class="panel glass">
+          <h3>Benim Deyim Defterim</h3>
+
+          <div class="list">
+            ${
+              custom ||
+              `<div class="item">
+                <strong>Henüz özel deyim yok</strong>
+                <small>Dışarıda duyduğun ifadeleri buraya ekleyebilirsin.</small>
+              </div>`
+            }
+          </div>
+        </div>
+      `;
+    }
+
+    function renderAddIdiom() {
+      document.getElementById("sectionContent").innerHTML = `
+        <div class="panel glass">
+          <h2>Kendi Deyimini Ekle</h2>
+          <p>
+            Almanca ifadeyi yaz.
+            Anlam/not kısmını istediğin dilde yazabilirsin.
+          </p>
+
+          <label>Almanca ifade</label>
+          <input id="customPhrase" placeholder="Kein Stress.">
+
+          <label>Anlam / not</label>
+          <textarea id="customNote" placeholder="Sorun yok, rahat ol. Arkadaş arasında kullanılıyor."></textarea>
+
+          <br><br>
+
+          <button class="btn" onclick="saveCustomIdiom()">Kaydet</button>
+        </div>
+      `;
+    }
+
+    function saveCustomIdiom() {
+      const phrase = document.getElementById("customPhrase").value.trim();
+      const note = document.getElementById("customNote").value.trim();
+
+      if (!phrase) {
+        toast("Almanca ifade gerekli");
+        return;
+      }
+
+      state.customIdioms.unshift({
+        phrase,
+        note,
+        id: Date.now()
+      });
+
+      saveState();
+      toast("Deyim defterine eklendi");
+      renderIdioms();
+    }
+
+    function checkIdiom(phrase) {
+      const key = phrase.toLowerCase().replace(/[.!?]/g, "").trim();
+
+      const result = safeMap[key] || {
+        label: "⚠️ Kontrol edilmeli",
+        why: "Bu ifadeyi yerel listede henüz tanımıyorum. Şimdilik dikkatli kullan.",
+        alt: "Daha güvenli akademik alternatif için: Meiner Meinung nach ... / Ich bin der Ansicht, dass ...",
+        where: "Emin değilsen TestDaF yazma bölümünde kullanma."
+      };
+
+      document.getElementById("sectionContent").innerHTML = `
+        <div class="panel glass">
+          <h2>Uygunluk Kontrolü</h2>
+
+          <div class="list">
+            <div class="item">
+              <strong>${escapeHtml(phrase)}</strong>
+              <small>${result.label}</small>
+            </div>
+
+            <div class="item">
+              <strong>Açıklama</strong>
+              <small>${result.why}</small>
+            </div>
+
+            <div class="item">
+              <strong>Daha uygun alternatif</strong>
+              <small>${result.alt}</small>
+            </div>
+
+            <div class="item">
+              <strong>Nerede kullanabilirim?</strong>
+              <small>${result.where}</small>
+            </div>
+          </div>
+
+          <br>
+
+          <button class="btn secondary" onclick="renderIdioms()">Geri dön</button>
+        </div>
+      `;
+    }
+
+    function renderPuzzle() {
+      puzzleCombo = 0;
+      puzzleQuestion();
+    }
+
+    function puzzleQuestion() {
+      const item = idioms[Math.floor(Math.random() * idioms.length)];
+
+      const options = shuffle([
+        item.phrase,
+        ...idioms
+          .filter(x => x.phrase !== item.phrase)
+          .slice(0, 3)
+          .map(x => x.phrase)
+      ]);
+
+      document.getElementById("sectionContent").innerHTML = `
+        <div class="panel glass">
+          <h2>Emoji Puzzle</h2>
+          <p>Öğrendiğin ifadeleri emojilerden tahmin et.</p>
+
+          <div style="font-size:3rem; text-align:center; margin:20px 0;">
+            ${item.icon}
+          </div>
+
+          ${options.map(o => `
+            <button class="option" onclick="answerPuzzle(${JSON.stringify(o)}, ${JSON.stringify(item.phrase)}, ${JSON.stringify(item.meaning)})">
+              ${o}
+            </button>
+          `).join("")}
+
+          <small>Combo: ${puzzleCombo}</small>
+        </div>
+      `;
+    }
+
+    function answerPuzzle(choice, correct, meaning) {
+      if (choice === correct) {
+        puzzleCombo++;
+
+        const bonus = puzzleCombo >= 3 ? 5 : 0;
+
+        gainXp(10 + bonus, "🧩 Emoji Puzzle");
+        toast(`Doğru! Combo x${puzzleCombo}`);
+
+        puzzleQuestion();
+      } else {
+        puzzleCombo = 0;
+
+        document.getElementById("sectionContent").innerHTML = `
+          <div class="panel glass">
+            <h2>Henüz değil, ama sorun yok.</h2>
+
+            <p>Doğru cevap: <strong>${correct}</strong></p>
+            <p>Anlamı: ${meaning}</p>
+            <p>Yanlışta ceza yok. Açıklamayla öğreniyoruz.</p>
+
+            <button class="btn" onclick="puzzleQuestion()">Devam</button>
+          </div>
+        `;
+      }
+    }
+
+    function renderSocial() {
+      const leaders = [
+        {
+          name: "Lena",
+          xp: 1800
+        },
+        {
+          name: state.name || "Sen",
+          xp: state.xp,
+          me: true
+        },
+        {
+          name: "Arda",
+          xp: 920
+        },
+        {
+          name: "Sofia",
+          xp: 870
+        }
+      ].sort((a, b) => b.xp - a.xp);
+
+      document.getElementById("sectionContent").innerHTML = `
+        <div class="panel glass">
+          <h2>Rozetler</h2>
+
+          <div class="badge-grid">
+            ${badge("🏁", "İlk Mini Deneme", "Mini denemeyi tamamla")}
+            ${badge("📚", "Kelime Tekrarı", "Kelime modülünü bitir")}
+            ${badge("🧩", "Emoji Puzzle", "Deyim puzzle oyna")}
+            ${badge("🎯", "TDN 4 Avcısı", "Mini denemede %80+")}
+          </div>
+        </div>
+
+        <div class="panel glass">
+          <h2>Liderlik</h2>
+          <p>İlk sürümde demo sıralama. Hesap sistemi olmadığı için online değildir.</p>
+
+          <div class="list">
+            ${leaders.map((l, i) => `
+              <div class="leader-row ${l.me ? "me" : ""}">
+                <strong>#${i + 1}</strong>
+                <span>${escapeHtml(l.name)}</span>
+                <b>${l.xp} XP</b>
+              </div>
+            `).join("")}
+          </div>
+
+          <br>
+
+          <button class="btn" onclick="renderShareCard('fürlingo ilerlemem', '${state.target}', '${state.xp} XP')">
+            Paylaşım kartı oluştur
+          </button>
+        </div>
+      `;
+    }
+
+    function badge(icon, name, desc) {
+      const unlocked =
+        state.badges.includes(name) ||
+        (name === "Kelime Tekrarı" && state.xp >= 30) ||
+        (name === "Emoji Puzzle" && state.xp >= 10) ||
+        (name === "TDN 4 Avcısı" && (state.lastMiniScore || 0) >= 80);
+
+      return `
+        <div class="badge ${unlocked ? "" : "locked"}">
+          <span style="font-size:1.7rem">${icon}</span>
+          <b>${name}</b>
+          <small>${unlocked ? "Açıldı" : desc}</small>
+        </div>
+      `;
+    }
+
+    function renderShareCard(title, main, sub) {
+      document.getElementById("sectionContent").innerHTML = `
+        <div class="panel glass">
+          <h2>Paylaşım Kartı</h2>
+          <p>Instagram hikâyesi için tasarım önizlemesi. İlk prototipte kartı ekranda gösteriyoruz.</p>
+
+          <div class="share-card">
+            <div class="brand">
+              <span class="brand-icon">${state.avatar}</span>
+              <span>fürlingo</span>
+            </div>
+
+            <div>
+              <div class="big">🏆</div>
+              <h2>${escapeHtml(title)}</h2>
+              <p><strong>${escapeHtml(main)}</strong></p>
+              <p>${escapeHtml(sub)}</p>
+            </div>
+
+            <div>
+              <span class="pill">#TestDaF</span>
+              <span class="pill">#Deutschlernen</span>
+            </div>
+          </div>
+
+          <button class="btn secondary" onclick="toast('Ekran görüntüsü alıp hikâyende paylaşabilirsin')">
+            Paylaşma notu
+          </button>
+        </div>
+      `;
+    }
+
+    function renderProfile() {
+      document.getElementById("sectionContent").innerHTML = `
+        <div class="panel glass">
+          <h2>Profil & Ayarlar</h2>
+
+          <label>İsim</label>
+          <input id="profileName" value="${escapeHtml(state.name)}" placeholder="İsmini yaz">
+
+          <label>Dil</label>
+          <select id="profileLang">
+            <option value="tr">Türkçe</option>
+            <option value="de">Deutsch</option>
+            <option value="en">English</option>
+          </select>
+
+          <label>Hedef</label>
+          <select id="profileTarget">
+            <option>TDN 3</option>
+            <option>TDN 4</option>
+            <option>TDN 5</option>
+          </select>
+
+          <label>Sınav tarihi</label>
+          <input id="profileExam" type="date" value="${state.examDate || ""}">
+
+          <label>Tema</label>
+          <select id="profileTheme">
+            ${Object.keys(themeNames.tr).map(code => `
+              <option value="${code}">${themeNames[state.lang][code]}</option>
+            `).join("")}
+          </select>
+
+          <label>Avatar</label>
+          <select id="profileAvatar">
+            ${["📘", "🧑‍🎓", "☕", "🌱", "🧠", "🚀", "✨"].map(a => `
+              <option>${a}</option>
+            `).join("")}
+          </select>
+
+          <br><br>
+
+          <button class="btn" onclick="saveProfile()">Kaydet</button>
+        </div>
+
+        <div class="panel glass">
+          <h3>Hatırlatmalar</h3>
+          <p>
+            Hatırlatmalar baskı için değil, çalışma ritmini korumak içindir.
+            Tarayıcı bildirimi yerine v1’de uygulama içi ayar olarak durur.
+          </p>
+
+          ${reminderToggle("daily", "Günlük çalışma")}
+          ${reminderToggle("exam", "Sınava kalan süre")}
+          ${reminderToggle("streak", "Seri bozulmadan önce")}
+          ${reminderToggle("mock", "Deneme günü")}
+          ${reminderToggle("vocab", "Kelime tekrarı")}
+
+          <br>
+
+          <button class="btn secondary" onclick="saveReminders()">Hatırlatmaları kaydet</button>
+        </div>
+
+        <div class="panel glass">
+          <h3>Gizlilik ve veri</h3>
+          <p>Sosyal sıralama kullanıcının kontrolünde olur. v1’de demo olarak gösterilir.</p>
+
+          <button class="btn danger" onclick="confirmReset()">Verileri sıfırla</button>
+        </div>
+      `;
+
+      document.getElementById("profileLang").value = state.lang;
+      document.getElementById("profileTarget").value = state.target;
+      document.getElementById("profileTheme").value = state.theme;
+      document.getElementById("profileAvatar").value = state.avatar;
+    }
+
+    function reminderToggle(key, label) {
+      return `
+        <label class="item">
+          <input type="checkbox" id="rem_${key}" ${state.reminders[key] ? "checked" : ""} style="width:auto; margin-right:8px;">
+          ${label}
+        </label>
+      `;
+    }
+
+    function saveProfile() {
+      state.name = document.getElementById("profileName").value.trim();
+      state.lang = document.getElementById("profileLang").value;
+      state.target = document.getElementById("profileTarget").value;
+      state.examDate = document.getElementById("profileExam").value;
+      state.theme = document.getElementById("profileTheme").value;
+      state.avatar = document.getElementById("profileAvatar").value;
+
+      saveState();
+      toast("Profil kaydedildi");
+      renderProfile();
+    }
+
+    function saveReminders() {
+      Object.keys(state.reminders).forEach(key => {
+        state.reminders[key] = document.getElementById("rem_" + key).checked;
+      });
+
+      saveState();
+      toast("Hatırlatma ayarları kaydedildi");
+    }
+
+    function confirmReset() {
+      document.getElementById("modalTitle").textContent = "Emin misin?";
+      document.getElementById("modalText").textContent =
+        "Bu işlem profilini, XP puanını, rozetlerini, yazı geçmişini ve ayarlarını sıfırlar.";
+
+      document.getElementById("modalConfirm").onclick = () => {
+        localStorage.removeItem(LS);
+        state = { ...defaultState };
+        temp = { ...state };
+        closeModal();
+        location.reload();
+      };
+
+      document.getElementById("modal").classList.add("show");
+    }
+
+    function closeModal() {
+      document.getElementById("modal").classList.remove("show");
+    }
+
+    function toggleStudyTimer() {
+      if (studyRunning) {
+        clearInterval(studyInterval);
+        studyRunning = false;
+      } else {
+        startStudyTimer();
+      }
+
+      updateTimerButton();
+    }
+
+    function startStudyTimer() {
+      if (studyRunning) return;
+
+      studyRunning = true;
+
+      studyInterval = setInterval(() => {
+        studySeconds++;
+        document.getElementById("studyTimerText").textContent = formatTime(studySeconds);
+      }, 1000);
+
+      updateTimerButton();
+    }
+
+    function updateTimerButton() {
+      document.getElementById("timerBtn").textContent =
+        studyRunning ? "Durdur" : "Başlat";
+    }
+
+    function timerNudge() {
+      if (!studyRunning) {
+        setTimeout(() => {
+          if (!studyRunning && document.getElementById("section").classList.contains("active")) {
+            toast("⏰ Kronometreyi açmak ister misin?");
+          }
+        }, 1200);
+      }
+    }
+
+    function startExamTimer(minutes) {
+      examSecondsLeft = minutes * 60;
+      examRunning = true;
+
+      startStudyTimer();
+
+      clearInterval(examInterval);
+
+      examInterval = setInterval(() => {
+        examSecondsLeft--;
+
+        const element = document.getElementById("examTimerText");
+
+        if (element) {
+          element.textContent = formatTime(examSecondsLeft);
+        }
+
+        if (examSecondsLeft <= 0) {
+          stopExamTimer();
+          toast("Deneme süresi doldu");
+        }
+      }, 1000);
+    }
+
+    function stopExamTimer() {
+      examRunning = false;
+      clearInterval(examInterval);
+      examSecondsLeft = 0;
+    }
+
+    function formatTime(seconds) {
+      seconds = Math.max(0, seconds);
+
+      const h = String(Math.floor(seconds / 3600)).padStart(2, "0");
+      const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, "0");
+      const s = String(seconds % 60).padStart(2, "0");
+
+      return `${h}:${m}:${s}`;
+    }
+
+    function gainXp(amount, reason = "XP") {
+      state.xp += amount;
+
+      if (amount >= 50) {
+        state.streak = Math.max(1, state.streak + 1);
+      }
+
+      if (reason.includes("Kelime") && !state.badges.includes("Kelime Tekrarı")) {
+        state.badges.push("Kelime Tekrarı");
+      }
+
+      if (reason.includes("Emoji") && !state.badges.includes("Emoji Puzzle")) {
+        state.badges.push("Emoji Puzzle");
+      }
+
+      if ((state.lastMiniScore || 0) >= 80 && !state.badges.includes("TDN 4 Avcısı")) {
+        state.badges.push("TDN 4 Avcısı");
+      }
+
+      saveState();
+      toast(`${reason}: +${amount} XP`);
+    }
+
+    function scoreToTdn(score) {
+      if (score < 50) return "TDN 3 altı";
+      if (score < 65) return "TDN 3";
+      if (score < 80) return "TDN 3-4";
+      if (score < 90) return "TDN 4";
+      return "TDN 5";
+    }
+
+    function soon(name) {
+      toast(`${name} yakında eklenecek`);
+    }
+
+    function toast(message) {
+      const element = document.getElementById("toast");
+
+      element.textContent = message;
+      element.classList.add("show");
+
+      setTimeout(() => {
+        element.classList.remove("show");
+      }, 2200);
+    }
+
+    function shuffle(array) {
+      return [...array].sort(() => Math.random() - .5);
+    }
+
+    function escapeHtml(value) {
+      return String(value || "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      }[char]));
+    }
+
+    window.addEventListener("load", () => {
+      temp = { ...state };
+
+      applyState();
+
+      if (state.onboarded) {
+        showScreen("home");
+      } else {
+        renderThemeChoices();
+        showScreen("onboarding");
+      }
+    });
+  </script>
+</body>
+</html>
